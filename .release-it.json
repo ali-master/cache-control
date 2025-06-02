@@ -1,4 +1,5 @@
 {
+  "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
   "git": {
     "commitMessage": "chore(): release v${version}"
   },
