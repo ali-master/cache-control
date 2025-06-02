@@ -1,9 +1,12 @@
 const BooleanCacheControlDirectiveMap = {
   "no-cache": "no-cache",
   "no-store": "no-store",
+  "no-transform": "no-transform",
+  "only-if-cached": "only-if-cached",
   "must-revalidate": "must-revalidate",
   "proxy-revalidate": "proxy-revalidate",
   "must-understand": "must-understand",
+  immutable: "immutable",
   private: "private",
   public: "public",
 } as const;
@@ -13,6 +16,8 @@ type BooleanCacheControlDirective = keyof typeof BooleanCacheControlDirectiveMap
 const NumberCacheControlDirectiveMap = {
   "max-age": "max-age",
   "s-maxage": "s-maxage",
+  "max-stale": "max-stale",
+  "min-fresh": "min-fresh",
   "stale-while-revalidate": "stale-while-revalidate",
   "stale-if-error": "stale-if-error",
 } as const;
@@ -79,7 +84,13 @@ export class CacheControl {
     directive: TDirective,
     value?: DirectiveValue<TDirective>,
   ): this {
-    this.directives[directive] = value as never;
+    if (directive in BooleanCacheControlDirectiveMap) {
+      this.directives[directive] = (value === true || value === undefined) as never;
+    } else if (directive in NumberCacheControlDirectiveMap) {
+      if (typeof value === "number" && value >= 0) {
+        this.directives[directive] = value as never;
+      }
+    }
     return this;
   }
 
@@ -104,5 +115,29 @@ export class CacheControl {
     }
 
     return parts.join(", ");
+  }
+
+  clear(): this {
+    this.directives = {};
+    return this;
+  }
+
+  has<TDirective extends CacheControlDirective>(directive: TDirective): boolean {
+    return directive in this.directives && this.directives[directive] !== undefined;
+  }
+
+  delete<TDirective extends CacheControlDirective>(directive: TDirective): this {
+    delete this.directives[directive];
+    return this;
+  }
+
+  static from(value?: string | null): CacheControl {
+    return new CacheControl(value);
+  }
+
+  toJSON(): Partial<{
+    [TDirective in CacheControlDirective]: DirectiveValue<TDirective>;
+  }> {
+    return { ...this.directives };
   }
 }
