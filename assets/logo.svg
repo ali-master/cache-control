@@ -1,13 +1,20 @@
 <svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7B68EE;stop-opacity:1" />
+    <!--Modern gradient with vibrant colors-->
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#4ECDC4;stop-opacity:1"/>
     </linearGradient>
-    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feFlood flood-color="#000000" flood-opacity="0.2"/>
+    <!--Secondary gradient for accents-->
+    <linearGradient id="accentGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#556270;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#C44569;stop-opacity:1"/>
+    </linearGradient>
+    <!--Subtle shadow filter-->
+    <filter id="modernShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feFlood flood-color="#000000" flood-opacity="0.15"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
@@ -15,35 +22,33 @@
       </feMerge>
     </filter>
   </defs>
-  
-  <!-- Background Circle -->
-  <circle cx="120" cy="120" r="110" fill="url(#logoGradient)" opacity="0.1"/>
-  
-  <!-- Main Cache Symbol -->
+  <!--Background circle with subtle gradient-->
+  <circle cx="120" cy="120" r="100" fill="#F7F9FB"/>
+  <!--Main Icon Container-->
   <g transform="translate(120, 120)">
-    <!-- Clock/Timer Circle -->
-    <circle cx="0" cy="0" r="60" fill="none" stroke="url(#logoGradient)" stroke-width="8" stroke-linecap="round" stroke-dasharray="15 5" opacity="0.8"/>
-    
-    <!-- Center Shield/Storage -->
-    <path d="M -30 -15 L -30 15 C -30 25 -20 35 0 40 C 20 35 30 25 30 15 L 30 -15 C 30 -25 20 -35 0 -35 C -20 -35 -30 -25 -30 -15 Z" 
-          fill="url(#logoGradient)" 
-          filter="url(#shadow)"/>
-    
-    <!-- Cache Arrows -->
-    <g stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <!-- Refresh/Cycle Arrow -->
-      <path d="M -10 -5 A 12 12 0 1 1 10 -5" />
-      <path d="M 8 -8 L 10 -5 L 13 -3" fill="white"/>
-      
-      <!-- Storage Lines -->
-      <line x1="-15" y1="8" x2="15" y2="8" stroke-width="2"/>
-      <line x1="-15" y1="15" x2="15" y2="15" stroke-width="2"/>
+    <!--Outer ring representing cache cycle-->
+    <g transform="rotate(-45)">
+      <path d="M -60 0 A 60 60 0 0 1 0 -60" fill="none" stroke="url(#primaryGradient)" stroke-width="12" stroke-linecap="round"/>
+      <path d="M 0 60 A 60 60 0 0 1 60 0" fill="none" stroke="url(#primaryGradient)" stroke-width="12" stroke-linecap="round" opacity="0.4"/>
     </g>
-    
-    <!-- Time Indicator -->
-    <circle cx="0" cy="-50" r="4" fill="url(#logoGradient)"/>
-    <circle cx="50" cy="0" r="4" fill="url(#logoGradient)"/>
-    <circle cx="0" cy="50" r="4" fill="url(#logoGradient)"/>
-    <circle cx="-50" cy="0" r="4" fill="url(#logoGradient)"/>
+    <!--Center geometric shape representing storage-->
+    <g filter="url(#modernShadow)">
+      <!--Modern hexagon-inspired shape-->
+      <path d="M -35 -20 L -35 10 L 0 35 L 35 10 L 35 -20 L 0 -45 Z" fill="url(#accentGradient)"/>
+      <!--Inner details-->
+      <g fill="white">
+        <!--Speed lines representing fast cache-->
+        <rect x="-20" y="-10" width="15" height="3" rx="1.5"/>
+        <rect x="-20" y="-2" width="25" height="3" rx="1.5"/>
+        <rect x="-20" y="6" width="20" height="3" rx="1.5"/>
+        <!--Arrow indicating refresh-->
+        <path d="M 10 -8 L 18 -8 L 18 -12 L 25 -5 L 18 2 L 18 -2 L 10 -2 Z" opacity="0.9"/>
+      </g>
+    </g>
+    <!--Corner accents-->
+    <circle cx="-60" cy="-60" r="5" fill="url(#primaryGradient)" opacity="0.6"/>
+    <circle cx="60" cy="-60" r="5" fill="url(#primaryGradient)" opacity="0.6"/>
+    <circle cx="60" cy="60" r="5" fill="url(#primaryGradient)" opacity="0.6"/>
+    <circle cx="-60" cy="60" r="5" fill="url(#primaryGradient)" opacity="0.6"/>
   </g>
 </svg>
