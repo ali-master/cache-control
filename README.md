@@ -102,14 +102,21 @@ res.setHeader('Cache-Control', cache.toString());
 Support for platform-specific CDN headers out of the box.
 
 ```typescript
-// Standard Cache-Control
-const browserCache = new CacheControl().set('public', true).set('max-age', 300);
+import { CacheControl, getCDNHeader, applyCDNHeaders } from '@usex/cache-control';
 
-// CDN-specific headers (Cloudflare, Fastly, etc.)
-const cdnCache = new CacheControl().set('public', true).set('s-maxage', 7200);
+// Create your cache strategy
+const cache = new CacheControl()
+  .set('public', true)
+  .set('s-maxage', 7200)
+  .set('stale-while-revalidate', 60);
 
-// Vercel Edge Network
-const vercelCache = new CacheControl().set('stale-while-revalidate', 60);
+// Get CDN-specific headers
+const vercelHeader = getCDNHeader(cache, 'vercel');
+// { header: 'Vercel-CDN-Cache-Control', value: 'public, s-maxage=7200, stale-while-revalidate=60' }
+
+// Apply to your response
+applyCDNHeaders(res, cache, ['vercel', 'cloudflare']);
+// Sets both Vercel-CDN-Cache-Control and Cloudflare-CDN-Cache-Control headers
 ```
 
 ## 📚 Complete API Reference
@@ -203,6 +210,188 @@ cache.clear();
 
 // Convert to string
 const header = cache.toString();
+
+// Create from existing header
+const cache2 = CacheControl.from('public, max-age=3600');
+
+// Get as JSON
+const json = cache.toJSON();
+```
+
+## 🌍 CDN-Specific Headers
+
+Cache Control provides built-in support for all major CDN providers. Each CDN uses its own header name for cache control directives.
+
+### Supported CDN Providers
+
+| Provider | Header Name | Use Case |
+|----------|-------------|----------|
+| **Vercel** | `Vercel-CDN-Cache-Control` | Vercel Edge Network |
+| **Cloudflare** | `Cloudflare-CDN-Cache-Control` | Cloudflare CDN |
+| **Fastly** | `Surrogate-Control` | Fastly CDN |
+| **AWS CloudFront** | `CloudFront-Cache-Control` | Amazon CloudFront |
+| **Akamai** | `Edge-Control` | Akamai Edge |
+| **Bunny CDN** | `Bunny-Cache-Control` | Bunny CDN |
+| **KeyCDN** | `X-KeyCDN-Cache-Control` | KeyCDN |
+| **Netlify** | `Netlify-CDN-Cache-Control` | Netlify Edge |
+| **Azure Front Door** | `X-Azure-Cache-Control` | Microsoft Azure CDN |
+| **Google Cloud CDN** | `X-Cloud-CDN-Cache-Control` | Google Cloud CDN |
+| **Alibaba CDN** | `Ali-Swift-Cache-Control` | Alibaba Cloud CDN |
+
+### CDN Header Functions
+
+```typescript
+import { 
+  CacheControl, 
+  getCDNHeader, 
+  getCDNHeaders,
+  applyCDNHeaders,
+  getAllCDNProviders,
+  isValidCDNProvider 
+} from '@usex/cache-control';
+
+// Create cache strategy
+const cache = new CacheControl()
+  .set('public', true)
+  .set('s-maxage', 86400)
+  .set('stale-while-revalidate', 60);
+
+// Get single CDN header
+const vercel = getCDNHeader(cache, 'vercel');
+console.log(vercel);
+// { 
+//   header: 'Vercel-CDN-Cache-Control', 
+//   value: 'public, s-maxage=86400, stale-while-revalidate=60' 
+// }
+
+// Get multiple CDN headers
+const headers = getCDNHeaders(cache, ['vercel', 'cloudflare', 'fastly']);
+
+// Apply directly to response
+applyCDNHeaders(res, cache, 'vercel');
+// or multiple providers
+applyCDNHeaders(res, cache, ['vercel', 'cloudflare']);
+
+// Get all available providers
+const providers = getAllCDNProviders();
+
+// Validate provider name
+if (isValidCDNProvider('vercel')) {
+  // TypeScript knows this is valid
+}
+```
+
+### Framework Integration
+
+#### Express.js
+```typescript
+import express from 'express';
+import { CacheControl, applyCDNHeaders } from '@usex/cache-control';
+
+const app = express();
+
+app.get('/api/data', (req, res) => {
+  const cache = new CacheControl()
+    .set('public', true)
+    .set('s-maxage', 3600)
+    .set('stale-while-revalidate', 60);
+  
+  // Apply standard Cache-Control
+  res.setHeader('Cache-Control', cache.toString());
+  
+  // Apply CDN-specific headers
+  applyCDNHeaders(res, cache, 'vercel');
+  
+  res.json({ data: 'example' });
+});
+```
+
+#### Fastify
+```typescript
+import fastify from 'fastify';
+import { CacheControl, applyCDNHeaders } from '@usex/cache-control';
+
+const app = fastify();
+
+app.get('/api/data', async (request, reply) => {
+  const cache = new CacheControl()
+    .set('public', true)
+    .set('s-maxage', 3600)
+    .set('stale-while-revalidate', 60);
+  
+  // Apply standard Cache-Control
+  reply.header('Cache-Control', cache.toString());
+  
+  // Apply CDN-specific headers (works with Fastify's reply object)
+  applyCDNHeaders(reply, cache, ['vercel', 'cloudflare']);
+  
+  return { data: 'example' };
+});
+```
+
+#### Next.js API Routes
+```typescript
+import { NextApiRequest, NextApiResponse } from 'next';
+import { CacheControl, applyCDNHeaders } from '@usex/cache-control';
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  const cache = new CacheControl()
+    .set('public', true)
+    .set('s-maxage', 86400)
+    .set('stale-while-revalidate', 60);
+  
+  // Apply both standard and Vercel-specific headers
+  res.setHeader('Cache-Control', cache.toString());
+  applyCDNHeaders(res, cache, 'vercel');
+  
+  res.status(200).json({ data: 'example' });
+}
+```
+
+### CDN-Specific Examples
+
+#### Vercel Edge Network
+```typescript
+const vercelCache = new CacheControl()
+  .set('public', true)
+  .set('s-maxage', 31536000)  // 1 year at edge
+  .set('stale-while-revalidate', 86400);  // 24 hours SWR
+
+applyCDNHeaders(res, vercelCache, 'vercel');
+```
+
+#### Cloudflare CDN
+```typescript
+const cloudflareCache = new CacheControl()
+  .set('public', true)
+  .set('s-maxage', 604800)  // 1 week
+  .set('must-revalidate', true);
+
+applyCDNHeaders(res, cloudflareCache, 'cloudflare');
+```
+
+#### Multi-CDN Setup
+```typescript
+// When using multiple CDN providers
+const multiCDNCache = new CacheControl()
+  .set('public', true)
+  .set('s-maxage', 3600)
+  .set('stale-if-error', 86400);
+
+// Apply to all your CDNs at once
+applyCDNHeaders(res, multiCDNCache, ['vercel', 'cloudflare', 'fastly']);
+```
+
+#### Enterprise CDN Configuration
+```typescript
+// AWS CloudFront + Azure Front Door
+const enterpriseCache = new CacheControl()
+  .set('public', true)
+  .set('s-maxage', 7200)
+  .set('max-age', 300)
+  .set('stale-while-revalidate', 60);
+
+applyCDNHeaders(res, enterpriseCache, ['aws-cloudfront', 'azure-front-door']);
 ```
 
 ## 🎮 Real-World Examples

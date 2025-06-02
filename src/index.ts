@@ -1,1 +1,2 @@
-export { CacheControl } from "./CacheControl";
+export { CacheControl } from "./cache-control";
+export * from "./cdn-header";
