@@ -1,0 +1,61 @@
+{
+  "name": "@usex/cache-control",
+  "description": "Lightning-fast Cache-Control header parser & builder. Craft perfect caching strategies with a fluent API, smart defaults, and zero dependencies. Because your CDN deserves better than string concatenation.",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": {
+    "name": "Ali Torki",
+    "url": "https://github.com/ali-master",
+    "email": "ali_4286@live.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ali-master/cache-control.git"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "nodejs",
+    "cdn",
+    "cache",
+    "cache-control",
+    "typescript",
+    "javascript",
+    "bun"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.ts\"",
+    "prepublish:next": "npm run build",
+    "publish:next": "npm publish --access public --tag next",
+    "prepublish:npm": "npm run build",
+    "publish:npm": "npm publish --access public",
+    "prerelease": "npm run build",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "prettier": "^3.5.3",
+    "release-it": "^19.0.3"
+  },
+  "changelog": {
+    "labels": {
+      "feature": "Features",
+      "bug": "Bug fixes",
+      "enhancement": "Enhancements",
+      "docs": "Docs",
+      "dependencies": "Dependencies",
+      "type: code style": "Code style tweaks",
+      "status: blocked": "Breaking changes",
+      "breaking change": "Breaking changes"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
