@@ -1,7 +1,7 @@
 {
   "name": "@usex/cache-control",
   "description": "Lightning-fast Cache-Control header parser & builder. Craft perfect caching strategies with a fluent API, smart defaults, and zero dependencies. Because your CDN deserves better than string concatenation.",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "license": "MIT",
   "author": {
     "name": "Ali Torki",
