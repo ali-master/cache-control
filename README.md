@@ -129,28 +129,32 @@ const cache = new CacheControl("public, max-age=3600");
 
 | Directive | Type | Description | Example |
 |-----------|------|-------------|---------|
-| `max-age` | Number | Maximum time (in seconds) a resource is considered fresh | `max-age=3600` |
-| `s-maxage` | Number | Overrides max-age for shared caches (e.g., CDNs) | `s-maxage=7200` |
-| `no-cache` | Boolean | Forces caches to submit request to origin server for validation before releasing cached copy | `no-cache` |
-| `no-store` | Boolean | Cache should not store anything about the request or response | `no-store` |
-| `no-transform` | Boolean | Caches must not modify the response body | `no-transform` |
-| `public` | Boolean | Response may be cached by any cache | `public` |
-| `private` | Boolean | Response is intended for a single user only | `private` |
-| `must-revalidate` | Boolean | Once stale, cache must not use response without successful validation | `must-revalidate` |
-| `proxy-revalidate` | Boolean | Same as must-revalidate but only for shared caches | `proxy-revalidate` |
-| `immutable` | Boolean | Response body will not change over time | `immutable` |
-| `stale-while-revalidate` | Number | Cache may serve stale response while revalidating in background | `stale-while-revalidate=60` |
-| `stale-if-error` | Number | Cache may serve stale response if origin server responds with error | `stale-if-error=300` |
-| `must-understand` | Boolean | Cache should store response only if it understands requirements | `must-understand` |
-| `only-if-cached` | Boolean | Client only wants cached response (used in requests) | `only-if-cached` |
+| `max-age` | Number | **Browser Cache Duration** - Specifies the maximum amount of time (in seconds) a resource is considered fresh. After this time expires, the cache must check with the origin server before using the cached copy | `max-age=3600` |
+| `s-maxage` | Number | **CDN Cache Duration** - Overrides `max-age` for shared caches like CDNs and proxies. Allows different cache durations for browsers vs edge servers | `s-maxage=7200` |
+| `max-stale` | Number | **Accept Stale Content** - Indicates the client is willing to accept a response that has exceeded its expiration time by up to the specified number of seconds. Useful for offline functionality | `max-stale=300` |
+| `min-fresh` | Number | **Require Fresh Content** - Client wants a response that will still be fresh for at least the specified number of seconds. Ensures content validity for time-sensitive operations | `min-fresh=60` |
+| `no-cache` | Boolean | **Always Validate** - Forces caches to submit the request to the origin server for validation before releasing a cached copy. Ensures users get the latest content while still benefiting from caching | `no-cache` |
+| `no-store` | Boolean | **Never Store** - The cache must not store either the request or response. Used for sensitive information like personal banking data or medical records | `no-store` |
+| `no-transform` | Boolean | **Preserve Original** - Intermediate caches or proxies must not modify the response body (no compression, image optimization, etc.). Critical for applications requiring exact byte-for-byte responses | `no-transform` |
+| `only-if-cached` | Boolean | **Offline Mode** - Client only wants a cached response and won't accept a network request. Returns 504 (Gateway Timeout) if no cached response is available. Perfect for offline-first applications | `only-if-cached` |
+| `public` | Boolean | **Cacheable by All** - Response may be cached by any cache, even if it would normally be non-cacheable. Explicitly marks responses as safe for CDN and browser caching | `public` |
+| `private` | Boolean | **User-Specific** - Response is intended for a single user and must not be stored by shared caches like CDNs. Browser cache only. Used for personalized content | `private` |
+| `must-revalidate` | Boolean | **Strict Validation** - Once stale, cache must not use the response without successful validation with the origin server. Prevents serving outdated content even in error scenarios | `must-revalidate` |
+| `proxy-revalidate` | Boolean | **CDN Validation** - Like `must-revalidate` but only applies to shared caches. Allows browsers to be more lenient while keeping CDN content strict | `proxy-revalidate` |
+| `must-understand` | Boolean | **Cache Compatibility** - Cache should only store the response if it understands the requirements for caching based on status code and request method. Ensures proper cache behavior | `must-understand` |
+| `immutable` | Boolean | **Never Changes** - Indicates the response body will not change over time. Browsers can skip revalidation even when user hits refresh. Perfect for versioned static assets | `immutable` |
+| `stale-while-revalidate` | Number | **Background Refresh** - Cache may serve stale content while asynchronously revalidating in the background. Improves perceived performance by avoiding loading delays | `stale-while-revalidate=60` |
+| `stale-if-error` | Number | **Fallback Content** - Cache may serve stale content if the origin server responds with 5xx errors or is unreachable. Improves reliability during outages | `stale-if-error=300` |
 
 #### 🕐 Time-Based Directives
 ```typescript
 cache
-  .set('max-age', 3600)              // Browser cache duration (seconds)
-  .set('s-maxage', 7200)             // CDN cache duration (seconds)
+  .set('max-age', 3600)              // Browser cache: 1 hour
+  .set('s-maxage', 7200)             // CDN cache: 2 hours
+  .set('max-stale', 300)             // Accept content up to 5 min stale
+  .set('min-fresh', 60)              // Require at least 1 min fresh
   .set('stale-while-revalidate', 60) // Serve stale while fetching fresh
-  .set('stale-if-error', 300);       // Serve stale on origin error
+  .set('stale-if-error', 300);       // Serve stale for 5 min on errors
 ```
 
 #### 🔒 Access Control Directives
@@ -236,6 +240,22 @@ const userContent = new CacheControl()
   .set('must-revalidate', true);
 ```
 
+### Offline-First Application
+```typescript
+// Request headers for offline support
+const offlineRequest = new CacheControl()
+  .set('only-if-cached', true)
+  .set('max-stale', 86400); // Accept day-old content when offline
+```
+
+### Time-Sensitive Content
+```typescript
+// Ensure content is fresh for critical operations
+const criticalData = new CacheControl()
+  .set('no-cache', true)
+  .set('min-fresh', 300); // Must be fresh for at least 5 minutes
+```
+
 ## 🔥 Pro Tips
 
 ### 1. CDN vs Browser Caching
@@ -270,7 +290,7 @@ Got ideas? Found a bug? PRs are welcome! Check out our [contributing guidelines]
 
 ## 📜 License
 
-This project is licensed under the MIT License. See the [LICENCE](./LICENCE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
 
 ---
 
